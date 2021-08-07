@@ -1,17 +1,12 @@
 const express = require("express");
-
-
-
-
-
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
-require("dotenv").config();
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.7xwek.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+require("dotenv").config();
+const uri= `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oq5xc.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
 
 const app = express();
 
@@ -22,46 +17,54 @@ app.use(fileUpload());
 
 const port = 5000;
 
-app.get("/", (req, res) => {
-  res.send("hello from db it's working working");
-});
+
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+app.get("/", (req, res) => {
+  
+  res.send("hello from db it's working working");
+});
 
 client.connect((err) => {
-  const serviceCollection = client
-    .db("accounting-service")
-    .collection("service");
-  const ordersCollection = client.db("accounting-service").collection("orders");
-  const reviewCollection = client.db("accounting-service").collection("review");
-  const adminCollection = client.db("accounting-service").collection("admin");
-
-  app.get("/service", (req, res) => {
-    serviceCollection.find({}).toArray((err, documents) => {
-      res.send(documents);
-    });
-  });
+  const serviceCollection = client.db("Photoshop-services").collection("service");
+  const ordersCollection = client.db("Photoshop-services").collection("orders");
+  const reviewCollection = client.db("Photoshop-services").collection("review");
+  const adminCollection = client.db("Photoshop-services").collection("admin");
 
   app.get("/orders", (req, res) => {
     ordersCollection.find({}).toArray((err, documents) => {
       res.send(documents);
     });
   });
+  
+
+  app.get("/admin", (req, res) => {
+    adminCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
+    });
+  });
+
   app.get("/reviews", (req, res) => {
     reviewCollection.find({}).toArray((err, documents) => {
       res.send(documents);
     });
   });
-    app.get("/admin", (req, res) => {
-      adminCollection.find({}).toArray((err, documents) => {
-        res.send(documents);
-      });
+  app.get("/service", (req, res) => {
+    serviceCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
     });
-
-
+  });
+  app.post("/addReview", (req, res) => {
+    const review = req.body;
+    console.log(review);
+    reviewCollection.insertOne(review).then((result) => {
+      res.send(result.insertedCount > 0);
+    });
+  });
+  
   app.post("/addOrder", (req, res) => {
     const orders = req.body;
     ordersCollection.insertOne(orders).then((result) => {
@@ -85,12 +88,7 @@ client.connect((err) => {
     });
   });
 
-  app.post("/addReview", (req, res) => {
-    const review = req.body;
-    reviewCollection.insertOne(review).then((result) => {
-      res.send(result.insertedCount > 0);
-    });
-  });
+  
 
 
 //   app.post('/orderByUsers', (req, res) => {
@@ -153,5 +151,13 @@ client.connect((err) => {
       });
   });
 });
+
+
+
+
+  
+
+
+
 
 app.listen(process.env.PORT || port);
